@@ -1,0 +1,89 @@
+version: '3.8'
+
+services:
+  inversionesji:
+    image: frankecb04/inversiones-image
+    build:
+      context: ./IJI-Backend-Mono
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_MONOLITO_DATASOURCE_URL: jdbc:postgresql://monolito:5432/InversionesJI
+      SPRING_MONOLITO_DATASOURCE_USERNAME: postgres
+      SPRING_MONOLITO_DATASOURCE_PASSWORD: admin
+
+      SPRING_PROPIEDAD_DATASOURCE_URL: jdbc:postgresql://micro:5432/PropiedadService
+      SPRING_PROPIEDAD_DATASOURCE_USERNAME: postgres
+      SPRING_PROPIEDAD_DATASOURCE_PASSWORD: admin
+      PROPERTY_SERVICE_URL: http://propiedadservice:8083
+    depends_on:
+      - monolito
+      - micro
+      - propiedadservice
+    networks:
+      - inversiones-network
+
+  propiedadservice:
+    image: frankecb04/propiedad-image
+    build:
+      context: ./IJI-Backend-Micro
+      dockerfile: Dockerfile
+    ports:
+      - "8083:8083"
+    environment:
+      SPRING_MICRO_DATASOURCE_URL: jdbc:postgresql://micro:5432/PropiedadService
+      SPRING_MICRO_DATASOURCE_USERNAME: postgres
+      SPRING_MICRO_DATASOURCE_PASSWORD: admin
+    depends_on:
+      - micro
+    networks:
+      - inversiones-network
+
+  monolito:
+    image: postgres:latest
+    environment:
+      POSTGRES_DB: InversionesJI
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: admin
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres-data-monolito:/var/lib/postgresql/data
+    networks:
+      - inversiones-network
+
+  micro:
+    image: postgres:latest
+    environment:
+      POSTGRES_DB: PropiedadService
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: admin
+    ports:
+      - "5434:5432"
+    volumes:
+      - postgres-data-propiedad:/var/lib/postgresql/data
+    networks:
+      - inversiones-network
+
+
+  pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: "inversiones@admin.com"
+      PGADMIN_DEFAULT_PASSWORD: "admin"
+    ports:
+      - "80:80"
+    depends_on:
+      - micro
+      - monolito
+    networks:
+      - inversiones-network
+
+volumes:
+  postgres-data-monolito:
+  postgres-data-propiedad:
+
+networks:
+  inversiones-network:
+    driver: bridge
