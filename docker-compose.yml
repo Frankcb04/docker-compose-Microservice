@@ -3,9 +3,6 @@ version: '3.8'
 services:
   inversionesji:
     image: frankecb04/inversiones-image
-    build:
-      context: ./IJI-Backend-Mono
-      dockerfile: Dockerfile
     ports:
       - "8080:8080"
     environment:
@@ -26,9 +23,6 @@ services:
 
   propiedadservice:
     image: frankecb04/propiedad-image
-    build:
-      context: ./IJI-Backend-Micro
-      dockerfile: Dockerfile
     ports:
       - "8083:8083"
     environment:
@@ -63,20 +57,6 @@ services:
       - "5434:5432"
     volumes:
       - postgres-data-propiedad:/var/lib/postgresql/data
-    networks:
-      - inversiones-network
-
-
-  pgadmin:
-    image: dpage/pgadmin4
-    environment:
-      PGADMIN_DEFAULT_EMAIL: "inversiones@admin.com"
-      PGADMIN_DEFAULT_PASSWORD: "admin"
-    ports:
-      - "80:80"
-    depends_on:
-      - micro
-      - monolito
     networks:
       - inversiones-network
 
