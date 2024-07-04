@@ -6,17 +6,16 @@ services:
     ports:
       - "8080:8080"
     environment:
-      SPRING_MONOLITO_DATASOURCE_URL: jdbc:postgresql://monolito:5432/InversionesJI
+      SPRING_MONOLITO_DATASOURCE_URL: jdbc:postgresql://db:5432/InversionesJI
       SPRING_MONOLITO_DATASOURCE_USERNAME: postgres
       SPRING_MONOLITO_DATASOURCE_PASSWORD: admin
 
-      SPRING_PROPIEDAD_DATASOURCE_URL: jdbc:postgresql://micro:5432/PropiedadService
+      SPRING_PROPIEDAD_DATASOURCE_URL: jdbc:postgresql://db:5432/PropiedadService
       SPRING_PROPIEDAD_DATASOURCE_USERNAME: postgres
       SPRING_PROPIEDAD_DATASOURCE_PASSWORD: admin
       PROPERTY_SERVICE_URL: http://propiedadservice:8083
     depends_on:
-      - monolito
-      - micro
+      - db
       - propiedadservice
     networks:
       - inversiones-network
@@ -26,43 +25,28 @@ services:
     ports:
       - "8083:8083"
     environment:
-      SPRING_MICRO_DATASOURCE_URL: jdbc:postgresql://micro:5432/PropiedadService
+      SPRING_MICRO_DATASOURCE_URL: jdbc:postgresql://db:5432/PropiedadService
       SPRING_MICRO_DATASOURCE_USERNAME: postgres
       SPRING_MICRO_DATASOURCE_PASSWORD: admin
     depends_on:
-      - micro
+      - db
     networks:
       - inversiones-network
 
-  monolito:
-    image: postgres:latest
+  db:
+    image: frankecb04/bd
     environment:
-      POSTGRES_DB: InversionesJI
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: admin
     ports:
       - "5433:5432"
     volumes:
-      - postgres-data-monolito:/var/lib/postgresql/data
-    networks:
-      - inversiones-network
-
-  micro:
-    image: postgres:latest
-    environment:
-      POSTGRES_DB: PropiedadService
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: admin
-    ports:
-      - "5434:5432"
-    volumes:
-      - postgres-data-propiedad:/var/lib/postgresql/data
+      - postgres-data:/var/lib/postgresql/data
     networks:
       - inversiones-network
 
 volumes:
-  postgres-data-monolito:
-  postgres-data-propiedad:
+  postgres-data:
 
 networks:
   inversiones-network:
